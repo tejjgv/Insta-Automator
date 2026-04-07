@@ -33,13 +33,13 @@ public class InstagramService {
 
     // 2. Add @Async and accept the jobId
     @Async("reelTaskExecutor")
-    public void processFullReelFlowAsync(String jobId, String videoUrl, String caption) {
+    public void processFullReelFlowAsync(String jobId, String[] videoUrls, String caption) {
         log.info("Starting background Reel processing for Job ID: {}", jobId);
-        log.info("Job {} | videoUrl='{}' | caption='{}'", jobId, videoUrl, caption);
+        log.info("Job {} | videoUrl='{}' | caption='{}'", jobId, videoUrls, caption);
 
         try {
             updateJobStatus(jobId, "PROCESSING", "Creating media container...");
-            String creationId = createMediaContainer(videoUrl, caption);
+            String creationId = createMediaContainer(videoUrls, caption);
 
             updateJobStatus(jobId, "PROCESSING", "Waiting for Instagram to process the video...");
             waitForProcessing(creationId);
@@ -57,16 +57,17 @@ public class InstagramService {
         }
     }
 
-    private String createMediaContainer(String videoUrl, String caption) {
+    private String createMediaContainer(String Urls[], String caption) {
         // For Instagram Graph API, passing the token in the URL is generally safest
         String url = UriComponentsBuilder.fromHttpUrl(BASE_URL + userId + "/media")
                                          .queryParam("access_token", accessToken)
                                          .toUriString();
 
         Map<String, String> body = Map.of(
-                "video_url", videoUrl,
+                "video_url", Urls[0],
                 "caption", caption != null ? caption : "",
-                "media_type", "REELS"
+                "media_type", "REELS",
+                "cover_url", Urls[1]
         );
 
         try {

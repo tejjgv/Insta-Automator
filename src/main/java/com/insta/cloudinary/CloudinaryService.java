@@ -15,7 +15,7 @@ import java.util.Map;
 public class CloudinaryService {
 
     private static final Logger log = LoggerFactory.getLogger(CloudinaryService.class);
-    private static Cloudinary cloudinary;
+    private Cloudinary cloudinary;
 
     @Value("${cloudinary.cloud-name}")
     private String cloudName;
@@ -39,12 +39,12 @@ public class CloudinaryService {
     /**
      * Uploads a local video file to Cloudinary and returns the public URL.
      */
-    public static String uploadVideo(String localFilePath) {
-        log.info("Starting upload to Cloudinary for file: {}", localFilePath);
+    public String[] uploadVideo(String localVideoPath, String localThumbnailPath) {
+        log.info("Starting upload to Cloudinary for file: {}", localVideoPath);
         try {
-            File fileToUpload = new File(localFilePath);
+            File fileToUpload = new File(localVideoPath);
             if (!fileToUpload.exists()) {
-                throw new RuntimeException("Local file not found: " + localFilePath);
+                throw new RuntimeException("Local file not found: " + localVideoPath);
             }
 
             // The "resource_type", "video" parameter is CRITICAL!
@@ -53,10 +53,25 @@ public class CloudinaryService {
                     "resource_type", "video"
             ));
 
-            String publicUrl = uploadResult.get("secure_url").toString();
-            log.info("Successfully uploaded to Cloudinary! URL: {}", publicUrl);
+            String c_videoUrl = uploadResult.get("secure_url").toString();
 
-            return publicUrl;
+            File thumbnailFile = new File(localThumbnailPath);
+            if (!thumbnailFile.exists()) {
+                throw new RuntimeException("Thumbnail file not found: " + thumbnailFile);
+            }
+
+            Map thumbUpload = cloudinary.uploader().upload(thumbnailFile, ObjectUtils.asMap(
+                    "resource_type", "image"
+            ));
+
+            String c_thumbnailUrl = thumbUpload.get("secure_url").toString();
+
+            String[] urls = {c_videoUrl, c_thumbnailUrl};
+            log.info("Thumbnail uploaded: {}", c_thumbnailUrl);
+
+            log.info("Successfully uploaded to Cloudinary! URL: {}", c_videoUrl + "," + c_thumbnailUrl);
+
+            return urls;
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload video to Cloudinary", e);

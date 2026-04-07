@@ -18,15 +18,17 @@ public class CloudinaryTestController {
     public ResponseEntity<?> testUpload(@RequestBody Map<String, String> request) {
         try {
             // Grab the file path from the Postman JSON
-            String localPath = request.get("localFilePath");
+            String localVideoPath = request.get("localFilePath");
+            String localThumbnailPath = request.get("localThumbnailPath");
 
             // Upload to Cloudinary
-            String publicUrl = cloudinaryService.uploadVideo(localPath);
+            String[] publicUrl = cloudinaryService.uploadVideo(localVideoPath, localThumbnailPath);
 
             // Return the live URL so you can click it!
             return ResponseEntity.ok(Map.of(
                     "status", "Success! ☁️",
-                    "live_url", publicUrl
+                    "video_url", publicUrl[0],
+                    "thumbnail_url", publicUrl[1]
             ));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));

@@ -30,21 +30,22 @@ public class MainChain {
 
             // 1. Download content from the URL
       DownloadResult result = ytDlpService.downloadVideo(instaUrl);
-      String DownloadedFilePath = result.localFilePath;
+      String DownloadedVideoPath = result.localFilePath;
+      String DownloadedThumbnailPath = result.thumbnailPath;
 
-      String cloudinaryUrl =  CloudinaryService.uploadVideo(DownloadedFilePath);
-        log.info("Cloudinary URL: {}", cloudinaryUrl);
+      String[] cloudinaryUrls =  cloudinaryService.uploadVideo(DownloadedVideoPath, DownloadedThumbnailPath);
+        log.info("Cloudinary URL: {}", cloudinaryUrls);
 
       String caption = buildCaption(result);
 
       log.info("Publishing to Instagram");
         String jobId = UUID.randomUUID().toString();
 
-       instagramService.processFullReelFlowAsync(jobId, cloudinaryUrl, caption);
+       instagramService.processFullReelFlowAsync(jobId, cloudinaryUrls, caption);
 
          // 4. Cleanup local files
         log.info("Cleaning up local files");
-          cleanupFiles(DownloadedFilePath);
+          cleanupFiles(DownloadedVideoPath);
     }
 
     private String buildCaption(DownloadResult result) {

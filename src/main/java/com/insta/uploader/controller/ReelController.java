@@ -22,8 +22,9 @@ public class ReelController {
 
         String cleanCaption = sanitize(request.getFullCaption());
 
+
         // 3. Hand off to Spring's managed async execution
-        instagramService.processFullReelFlowAsync(jobId, request.getVideoUrl(), request.getFullCaption());
+        instagramService.processFullReelFlowAsync(jobId, new String[]{request.getVideoUrl(),request.getThumbnailUrl()}, request.getFullCaption());
         // 4. Return the ID so the client can check the status later
         return ResponseEntity.accepted().body(Map.of(
                 "message", "Reel processing started.",

@@ -28,6 +28,7 @@ public class YtDlpService {
 
     public static class DownloadResult {
         public String localFilePath;
+        public String thumbnailPath;
         public String title;
         public String description;
     }
@@ -45,6 +46,8 @@ public class YtDlpService {
                     "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
                     "--merge-output-format", "mp4",
                     "--write-info-json",
+                    "--write-thumbnail",
+                    "--convert-thumbnails", "jpg",
                     "--no-playlist",
                     "-o", outputTemplate,
                     url
@@ -79,8 +82,9 @@ public class YtDlpService {
                 throw new RuntimeException("Download completed but video file not found. yt-dlp output:\n" + outputLog);
             }
 
-            String videoFile = matchingFiles[0].getPath();
+            String videoFile = "downloads/" + downloadId + ".mp4";
             String jsonFile = "downloads/" + downloadId + ".info.json";
+            String thumbnailFile = "downloads/" + downloadId + ".jpg";
 
             if (!new File(jsonFile).exists()) {
                 throw new RuntimeException("Metadata file missing. yt-dlp output:\n" + outputLog);
@@ -93,6 +97,7 @@ public class YtDlpService {
             result.localFilePath = videoFile;
             result.title = jsonNode.path("title").asText("No Title");
             result.description = jsonNode.path("description").asText("No Description");
+            result.thumbnailPath = new File(thumbnailFile).exists() ? thumbnailFile : null;
 
             log.info("Download complete. File: {}", videoFile);
             return result;

@@ -19,6 +19,10 @@ public class ReelRequest {
     @JsonProperty("hashtags")
     private String hashtags;
 
+    @JsonProperty("thumbnail_url")
+    private String thumbnailUrl;
+
+
     /**
      * Helper to combine caption and hashtags for the API call.
      * Lombok handles the standard getters, but we keep custom logic here.
